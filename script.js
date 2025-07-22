@@ -1,569 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 Advanced Escape the Room</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            color: #f4f4f4;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow-x: hidden;
-        }
-
-        .game-container {
-            max-width: 900px;
-            width: 95%;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 0 40px rgba(255, 165, 0, 0.4);
-            border: 3px solid #ff6b35;
-            position: relative;
-            backdrop-filter: blur(10px);
-        }
-
-        .welcome-screen {
-            text-align: center;
-            animation: fadeIn 1s ease-in-out;
-        }
-
-        .welcome-screen.hidden {
-            display: none;
-        }
-
-        .welcome-title {
-            font-size: 3.5em;
-            color: #ff6b35;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
-            margin-bottom: 20px;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7); }
-            to { text-shadow: 3px 3px 25px rgba(255, 107, 53, 0.9); }
-        }
-
-        .name-input-section {
-            background: rgba(139, 69, 19, 0.3);
-            border-radius: 15px;
-            padding: 30px;
-            border: 2px solid #8b4513;
-            margin: 20px 0;
-        }
-
-        .name-input {
-            padding: 15px;
-            border: 3px solid #ff6b35;
-            border-radius: 10px;
-            background: rgba(244, 244, 244, 0.1);
-            color: #f4f4f4;
-            font-size: 1.2em;
-            width: 300px;
-            text-align: center;
-            margin: 20px;
-        }
-
-        .start-button {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #ff6b35, #ff4444);
-            color: white;
-            font-size: 1.3em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 20px;
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .game-title {
-            font-size: 2.8em;
-            color: #ff6b35;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            margin-bottom: 10px;
-        }
-
-        .player-info {
-            background: rgba(255, 107, 53, 0.1);
-            border: 2px solid #ff6b35;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        .player-name {
-            font-size: 1.5em;
-            color: #ffd700;
-            font-weight: bold;
-        }
-
-        .timer-display {
-            font-size: 2em;
-            color: #00ff00;
-            font-weight: bold;
-            background: rgba(0, 255, 0, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #00ff00;
-            margin: 10px 0;
-        }
-
-        .timer-warning {
-            color: #ff6600 !important;
-            border-color: #ff6600 !important;
-            background: rgba(255, 102, 0, 0.1) !important;
-        }
-
-        .timer-danger {
-            color: #ff0000 !important;
-            border-color: #ff0000 !important;
-            background: rgba(255, 0, 0, 0.1) !important;
-            animation: pulse 0.5s ease-in-out infinite;
-        }
-
-        .room {
-            display: none;
-            animation: slideIn 0.6s ease-out;
-        }
-
-        .room.active {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(100px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
-        }
-
-        .room-title {
-            font-size: 2.2em;
-            color: #ff6b35;
-            margin-bottom: 25px;
-            text-align: center;
-            border-bottom: 3px solid #8b4513;
-            padding-bottom: 15px;
-        }
-
-        .puzzle {
-            background: linear-gradient(135deg, rgba(139, 69, 19, 0.2), rgba(75, 55, 40, 0.3));
-            border: 3px solid #8b4513;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 25px 0;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .puzzle::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
-            transform: rotate(45deg);
-            transition: all 0.5s ease;
-            opacity: 0;
-        }
-
-        .puzzle:hover::before {
-            opacity: 1;
-            animation: shimmer 2s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
-        }
-
-        .puzzle:hover {
-            border-color: #ff6b35;
-            box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
-            transform: translateY(-5px);
-        }
-
-        .puzzle.solved {
-            background: linear-gradient(135deg, rgba(0, 255, 0, 0.2), rgba(0, 200, 0, 0.3));
-            border-color: #00ff00;
-            box-shadow: 0 0 25px rgba(0, 255, 0, 0.3);
-        }
-
-        .puzzle-emoji {
-            font-size: 3em;
-            margin-bottom: 15px;
-            display: block;
-            text-align: center;
-        }
-
-        .puzzle-title {
-            font-size: 1.6em;
-            color: #ffd700;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .puzzle-description {
-            margin-bottom: 25px;
-            line-height: 1.8;
-            font-size: 1.1em;
-            text-align: center;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        input[type="text"], input[type="number"], select {
-            flex: 1;
-            min-width: 250px;
-            padding: 15px;
-            border: 3px solid #8b4513;
-            border-radius: 10px;
-            background: rgba(244, 244, 244, 0.1);
-            color: #f4f4f4;
-            font-size: 1.1em;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #ff6b35;
-            box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
-            transform: scale(1.02);
-        }
-
-        button {
-            padding: 15px 25px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #ff6b35, #ff4444);
-            color: white;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 150px;
-        }
-
-        button:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.5);
-        }
-
-        .room-navigation {
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .progress-section {
-            background: rgba(139, 69, 19, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            border: 2px solid #8b4513;
-        }
-
-        .progress-bar {
-            background: rgba(139, 69, 19, 0.5);
-            border-radius: 15px;
-            height: 15px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, #ff6b35, #ffd700, #00ff00);
-            height: 100%;
-            width: 0%;
-            transition: width 0.8s ease;
-            border-radius: 15px;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-
-        .game-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            margin: 25px 0;
-        }
-
-        .stat {
-            text-align: center;
-            background: linear-gradient(135deg, rgba(139, 69, 19, 0.3), rgba(75, 55, 40, 0.4));
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #8b4513;
-            transition: all 0.3s ease;
-        }
-
-        .stat:hover {
-            transform: scale(1.05);
-            border-color: #ff6b35;
-        }
-
-        .stat-value {
-            font-size: 2.2em;
-            font-weight: bold;
-            color: #ff6b35;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 1em;
-            color: #ffd700;
-            margin-top: 5px;
-        }
-
-        .message-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .message-overlay.hidden {
-            display: none;
-        }
-
-        .big-message {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 4px solid;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            max-width: 80%;
-            animation: bounceIn 0.6s ease-out;
-        }
-
-        @keyframes bounceIn {
-            0% { transform: scale(0.3) rotate(10deg); opacity: 0; }
-            50% { transform: scale(1.1) rotate(-5deg); }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-
-        .big-message.success {
-            border-color: #00ff00;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
-        }
-
-        .big-message.error {
-            border-color: #ff0000;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
-        }
-
-        .big-message.info {
-            border-color: #ffd700;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-        }
-
-        .message-emoji {
-            font-size: 4em;
-            margin-bottom: 20px;
-            display: block;
-        }
-
-        .message-text {
-            font-size: 1.8em;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        .message-details {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
-
-        .final-score-screen {
-            text-align: center;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 4px solid #ffd700;
-            border-radius: 20px;
-            padding: 50px;
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
-        }
-
-        .final-emoji {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-
-        .final-title {
-            font-size: 2.5em;
-            color: #ffd700;
-            margin-bottom: 20px;
-        }
-
-        .score-breakdown {
-            background: rgba(139, 69, 19, 0.2);
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-            border: 2px solid #8b4513;
-        }
-
-        .score-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            font-size: 1.2em;
-        }
-
-        .score-total {
-            border-top: 2px solid #ffd700;
-            padding-top: 15px;
-            margin-top: 15px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #ffd700;
-        }
-
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 20px;
-            }
-            
-            .welcome-title, .game-title {
-                font-size: 2.2em;
-            }
-            
-            .input-group {
-                flex-direction: column;
-            }
-            
-            input[type="text"], input[type="number"], select {
-                min-width: auto;
-                width: 100%;
-            }
-            
-            .big-message {
-                max-width: 95%;
-                padding: 30px;
-            }
-            
-            .message-text {
-                font-size: 1.5em;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="game-container">
-        <!-- Welcome Screen -->
-        <div class="welcome-screen" id="welcomeScreen">
-            <h1 class="welcome-title">🔐 ESCAPE THE CHAMBER</h1>
-            <div class="name-input-section">
-                <h2 style="color: #ffd700; margin-bottom: 20px;">🎭 Enter Your Name, Brave Adventurer!</h2>
-                <p style="margin-bottom: 20px; font-size: 1.1em;">You're about to embark on a thrilling escape adventure through 5 mysterious chambers!</p>
-                <input type="text" id="playerNameInput" class="name-input" placeholder="Enter your name here..." maxlength="20">
-                <br>
-                <button class="start-button" onclick="startGame()">🚀 BEGIN ADVENTURE</button>
-            </div>
-            <div style="margin-top: 30px; font-size: 1.1em; opacity: 0.8;">
-                <p>⏱️ Beat the clock • 🧩 Solve unique puzzles • 🏆 Earn maximum points</p>
-            </div>
-        </div>
-
-        <!-- Game Screen -->
-        <div id="gameScreen" style="display: none;">
-            <div class="game-header">
-                <h1 class="game-title">🔐 ESCAPE THE CHAMBER</h1>
-                <div class="player-info">
-                    <div class="player-name">🎭 Player: <span id="playerName"></span></div>
-                </div>
-                <div class="timer-display" id="timerDisplay">⏰ Time: <span id="timer">60</span>s</div>
-                
-                <div class="progress-section">
-                    <div style="text-align: center; color: #ffd700; font-size: 1.2em; margin-bottom: 10px;">
-                        🏃‍♂️ Progress: <span id="currentRoomDisplay">1</span>/5 Chambers
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressBar"></div>
-                    </div>
-                </div>
-
-                <div class="game-stats">
-                    <div class="stat">
-                        <span class="stat-value" id="scoreValue">0</span>
-                        <div class="stat-label">💰 Score</div>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value" id="hintsValue">5</span>
-                        <div class="stat-label">💡 Hints</div>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value" id="roomValue">1</span>
-                        <div class="stat-label">🚪 Chamber</div>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value" id="solvedValue">0</span>
-                        <div class="stat-label">✅ Solved</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rooms will be dynamically generated -->
-            <div id="roomsContainer"></div>
-        </div>
-    </div>
-
-    <!-- Message Overlay -->
-    <div class="message-overlay hidden" id="messageOverlay">
-        <div class="big-message" id="bigMessage">
-            <span class="message-emoji" id="messageEmoji"></span>
-            <div class="message-text" id="messageText"></div>
-            <div class="message-details" id="messageDetails"></div>
-            <button onclick="closeBigMessage()">Continue</button>
-        </div>
-    </div>
-
-    <script>
-        // Game state variables
-        let playerName = '';
-        let gameTimer = 60; // Increased to 60 seconds for 5 rooms
+       let playerName = '';
+        let gameTimer = 300; 
         let score = 0;
         let hintsRemaining = 5;
         let currentRoom = 1;
@@ -572,8 +8,7 @@
         let puzzlesSolved = 0;
         let gameStartTime;
 
-        // Puzzle database with multiple variations
-        const puzzleDatabase = {
+    const puzzleDatabase = {
             1: [
                 {
                     emoji: '🔑',
@@ -708,9 +143,9 @@
 
         let currentPuzzles = {};
 
-        // Initialize game
+     
         const initGame = () => {
-            // Generate random puzzles for each room
+         
             for (let room = 1; room <= totalRooms; room++) {
                 const puzzleOptions = puzzleDatabase[room];
                 currentPuzzles[room] = puzzleOptions[Math.floor(Math.random() * puzzleOptions.length)];
@@ -723,7 +158,7 @@
             console.log(`🎮 ${playerName}'s adventure begins!`);
         };
 
-        // Generate all rooms dynamically
+      
         const generateRooms = () => {
             const container = document.getElementById('roomsContainer');
             container.innerHTML = '';
@@ -775,7 +210,7 @@
             return themes[roomNum - 1];
         };
 
-        // Start game function
+        
         const startGame = () => {
             const nameInput = document.getElementById('playerNameInput').value.trim();
             
@@ -797,7 +232,7 @@
             }, 2000);
         };
 
-        // Timer functionality
+        
         const startTimer = () => {
             timerInterval = setInterval(() => {
                 gameTimer--;
@@ -820,16 +255,16 @@
             }, 1000);
         };
 
-        // Check answer function
+   
         const checkAnswer = (roomNum) => {
             const input = document.getElementById(`input${roomNum}`);
             const userAnswer = input.value.toLowerCase().trim();
             const correctAnswer = currentPuzzles[roomNum].answer.toString().toLowerCase();
             
             if (userAnswer === correctAnswer) {
-                // Correct answer
+                
                 solvePuzzle(roomNum);
-                const points = 200 - (roomNum * 20); // More points for earlier rooms
+                const points = 200 - (roomNum * 20);
                 score += points;
                 
                 showBigMessage(
@@ -842,7 +277,7 @@
                 input.disabled = true;
                 input.style.background = 'rgba(0, 255, 0, 0.2)';
                 
-                // Enable next room or escape button
+                
                 if (roomNum < totalRooms) {
                     document.getElementById(`next${roomNum}`).disabled = false;
                 } else {
@@ -850,7 +285,7 @@
                 }
                 
             } else {
-                // Wrong answer
+               
                 score = Math.max(0, score - 25);
                 showBigMessage(
                     '❌', 
@@ -862,17 +297,17 @@
             updateStats();
         };
 
-        // Solve puzzle function
+     
         const solvePuzzle = (roomNum) => {
             const puzzleElement = document.getElementById(`puzzle${roomNum}`);
             puzzleElement.classList.add('solved');
             puzzlesSolved++;
             
-            // Add completion animation
+            
             puzzleElement.style.animation = 'pulse 1s ease-in-out';
         };
 
-        // Show hint function
+        
         const showHint = (roomNum) => {
             if (hintsRemaining <= 0) {
                 showBigMessage('💔', 'No Hints Left!', `Sorry ${playerName}, you've used all your hints!`, 'error');
@@ -892,14 +327,14 @@
             updateStats();
         };
 
-        // Room navigation
+    
         const goToRoom = (roomNumber) => {
             if (roomNumber < 1 || roomNumber > totalRooms) return;
             
-            // Hide all rooms
+       
             document.querySelectorAll('.room').forEach(room => room.classList.remove('active'));
             
-            // Show target room
+         
             document.getElementById(`room${roomNumber}`).classList.add('active');
             currentRoom = roomNumber;
             updateStats();
@@ -907,20 +342,19 @@
             showBigMessage('🚪', `Entering Chamber ${roomNumber}`, `Welcome to ${getRoomTheme(roomNumber)}!`, 'info');
         };
 
-        // Update statistics
+    
         const updateStats = () => {
             document.getElementById('scoreValue').textContent = score;
             document.getElementById('hintsValue').textContent = hintsRemaining;
             document.getElementById('roomValue').textContent = currentRoom;
             document.getElementById('solvedValue').textContent = puzzlesSolved;
             document.getElementById('currentRoomDisplay').textContent = currentRoom;
-            
-            // Update progress bar
+      
             const progress = (puzzlesSolved / totalRooms) * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
         };
 
-        // Show big message overlay
+        
         const showBigMessage = (emoji, title, details, type) => {
             const overlay = document.getElementById('messageOverlay');
             const message = document.getElementById('bigMessage');
@@ -935,18 +369,17 @@
             message.className = `big-message ${type}`;
             overlay.classList.remove('hidden');
             
-            // Auto-close after 3 seconds for info messages
+     
             if (type === 'info') {
                 setTimeout(closeBigMessage, 3000);
             }
         };
 
-        // Close big message
         const closeBigMessage = () => {
             document.getElementById('messageOverlay').classList.add('hidden');
         };
 
-        // Escape room (win condition)
+      
         const escapeRoom = () => {
             clearInterval(timerInterval);
             
@@ -960,7 +393,6 @@
             showFinalScore(totalScore, timeBonus, speedBonus, gameTime, performanceRating);
         };
 
-        // End game (lose condition)
         const endGame = (success) => {
             clearInterval(timerInterval);
             
@@ -981,7 +413,7 @@
             }
         };
 
-        // Get performance rating
+    
         const getPerformanceRating = (totalScore, gameTime) => {
             if (totalScore >= 1000 && gameTime <= 40) return { emoji: '🏆', title: 'LEGENDARY ESCAPE MASTER!', rank: 'S+' };
             if (totalScore >= 800 && gameTime <= 50) return { emoji: '🥇', title: 'ESCAPE CHAMPION!', rank: 'S' };
@@ -991,7 +423,7 @@
             return { emoji: '🏃', title: 'LUCKY ESCAPEE!', rank: 'D' };
         };
 
-        // Show final score screen
+        
         const showFinalScore = (totalScore, timeBonus, speedBonus, gameTime, performance) => {
             const overlay = document.getElementById('messageOverlay');
             const bigMessage = document.getElementById('bigMessage');
@@ -1057,7 +489,7 @@
             overlay.classList.remove('hidden');
         };
 
-        // Share score function
+        
         const shareScore = (totalScore, rank) => {
             const shareText = `🎮 I just escaped all 5 chambers in "Escape the Room"!\n\n🏆 Score: ${totalScore} points\n⭐ Rank: ${rank}\n🎭 Player: ${playerName}\n\nCan you beat my score? 🚀`;
             
@@ -1068,7 +500,7 @@
                     url: window.location.href
                 });
             } else {
-                // Fallback to clipboard
+              
                 navigator.clipboard.writeText(shareText).then(() => {
                     alert('Score copied to clipboard! Share it with your friends! 📋');
                 }).catch(() => {
@@ -1077,7 +509,7 @@
             }
         };
 
-        // Add keyboard support
+        
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !document.getElementById('messageOverlay').classList.contains('hidden')) {
                 closeBigMessage();
@@ -1096,14 +528,14 @@
             }
         });
 
-        // Add name input enter key support
+
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.target.id === 'playerNameInput') {
                 startGame();
             }
         });
 
-        // Prevent page refresh clearing progress
+
         window.addEventListener('beforeunload', (e) => {
             if (puzzlesSolved > 0 && puzzlesSolved < totalRooms) {
                 e.preventDefault();
@@ -1111,13 +543,13 @@
             }
         });
 
-        // Initialize welcome screen
+       
         window.addEventListener('load', () => {
             console.log('🔐 Escape the Chamber loaded successfully!');
             document.getElementById('playerNameInput').focus();
         });
 
-        // Add some easter eggs
+
         const konamiCode = [];
         const targetSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
         
@@ -1135,6 +567,4 @@
                 konamiCode.length = 0;
             }
         });
-    </script>
-</body>
-</html>
+   

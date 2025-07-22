@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Advanced Escape the Room</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <div class="game-container">
+     <div class="welcome-screen" id="welcomeScreen">
+            <h1 class="welcome-title">🔐 ESCAPE THE CHAMBER</h1>
+            <div class="name-input-section">
+                <h2 style="color: #ffd700; margin-bottom: 20px;">🎭 Enter Your Name, Brave Adventurer!</h2>
+                <p style="margin-bottom: 20px; font-size: 1.1em;">You're about to embark on a thrilling escape adventure through 5 mysterious chambers!</p>
+                <input type="text" id="playerNameInput" class="name-input" placeholder="Enter your name here..." maxlength="20">
+                <br>
+                <button class="start-button" onclick="startGame()">🚀 BEGIN ADVENTURE</button>
+            </div>
+            <div style="margin-top: 30px; font-size: 1.1em; opacity: 0.8;">
+                <p>⏱️ Beat the clock • 🧩 Solve unique puzzles • 🏆 Earn maximum points</p>
+            </div>
+        </div>
+   <div id="gameScreen" style="display: none;">
+            <div class="game-header">
+                <h1 class="game-title">🔐 ESCAPE THE CHAMBER</h1>
+                <div class="player-info">
+                    <div class="player-name">🎭 Player: <span id="playerName"></span></div>
+                </div>
+                <div class="timer-display" id="timerDisplay">⏰ Time: <span id="timer">300</span>s</div>
+                
+                <div class="progress-section">
+                    <div style="text-align: center; color: #ffd700; font-size: 1.2em; margin-bottom: 10px;">
+                        🏃‍♂️ Progress: <span id="currentRoomDisplay">1</span>/5 Chambers
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar"></div>
+                    </div>
+                </div>
+
+                <div class="game-stats">
+                    <div class="stat">
+                        <span class="stat-value" id="scoreValue">0</span>
+                        <div class="stat-label">💰 Score</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="hintsValue">5</span>
+                        <div class="stat-label">💡 Hints</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="roomValue">1</span>
+                        <div class="stat-label">🚪 Chamber</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="solvedValue">0</span>
+                        <div class="stat-label">✅ Solved</div>
+                    </div>
+                </div>
+            </div>
+
+         <div id="roomsContainer"></div>
+        </div>
+    </div>
+<div class="message-overlay hidden" id="messageOverlay">
+        <div class="big-message" id="bigMessage">
+            <span class="message-emoji" id="messageEmoji"></span>
+            <div class="message-text" id="messageText"></div>
+            <div class="message-details" id="messageDetails"></div>
+            <button onclick="closeBigMessage()">Continue</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    </body>
+</html>
